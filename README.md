@@ -1,66 +1,61 @@
-# Skillexify
+# Skillexify - Verifiable Technical Skill Credentials
 
-Skillexify is a mobile-first app that leverages zkTLS and XION's on-chain infrastructure to verify and showcase real, tamper-proof technical skill credentials. 
-
-## Overview
-
-In today's competitive tech landscape, verifying the authenticity of technical skills is challenging. Skillexify solves this by connecting to platforms like LeetCode, GitHub, Kaggle, HackerRank, and Stack Overflow to pull verifiable data on a user's activity, rankings, contributions, and certifications — without compromising privacy.
+Skillexify is a mobile-first app that leverages zkTLS and XION's on-chain infrastructure to verify and showcase real, tamper-proof technical skill credentials. It connects to platforms like LeetCode, GitHub, Kaggle, HackerRank, and Stack Overflow to pull verifiable data on a user's activity, rankings, contributions, and certifications — without compromising privacy.
 
 With this data, Skillexify generates a "Proof of Skill" badge, stored immutably on-chain. Users can flex their verified expertise in competitive programming, open-source contributions, data science, and more — while recruiters and collaborators can trust the authenticity of those claims.
 
+The app gamifies professional growth with leaderboards, personalized skill graphs, and skill-based communities. For example, top GitHub contributors or Kaggle Grandmasters can earn exclusive status NFTs and unlock access to elite networking groups, hackathons, or hiring channels.
+
 ## Features
 
-### Verifiable Skill Credentials
-- Connect to multiple platforms (LeetCode, GitHub, Kaggle, etc.)
-- Zero-Knowledge TLS verification ensures real credentials without exposing private data
-- On-chain storage of proofs for permanent verification
+### zkTLS Verification
+Zero-Knowledge TLS verification ensures your credentials are real without exposing private data. The app connects to platforms like:
+- LeetCode
+- GitHub
+- Kaggle
+- HackerRank
+- Stack Overflow
 
-### Gamification & Community
-- Global leaderboards for different skill categories
-- Personalized skill graphs and progress tracking
-- Skill-based communities with exclusive access
+### On-Chain Storage
+All proofs are stored immutably on the XION blockchain for permanent verification.
 
-### Blockchain Integration
-- XION wallet integration for identity management
-- NFT-based achievement badges for top performers
-- On-chain proof of skills that can be shared and verified
+### Dynamic NFT Evolution
+Skill NFTs upgrade automatically as users improve (e.g., Bronze → Gold).
 
-## How It Works
+### Privacy-Friendly Identity
+Prove skills anonymously without exposing personal information.
 
-1. **Connect Your Accounts**: Link your profiles from coding platforms
-2. **Verify Credentials**: zkTLS technology verifies your activity without exposing private data
-3. **Generate Proof**: Create immutable proof of your skills stored on the XION blockchain
-4. **Showcase Skills**: Display your verified credentials in your profile
-5. **Join Communities**: Access exclusive groups based on your verified skills
+### Passion Index
+Tracks developer engagement on Reddit, YouTube, Medium to show curiosity and activity.
 
-## Tech Stack
+### Reputation Score
+Earn peer endorsements from teammates, mentors, or open-source maintainers.
 
-- **Frontend**: React Native with Expo
-- **Blockchain**: XION Network
-- **Verification**: zkTLS (Zero-Knowledge TLS)
-- **Smart Contracts**: CosmWasm on XION
-- **Wallet Integration**: Abstraxion wallet
+### Community & Leaderboards
+Join skill-based communities and compete on global leaderboards.
 
 ## Getting Started
 
 1. Install dependencies:
-   ```bash
+   ```
    npm install
    ```
 
 2. Start the development server:
-   ```bash
+   ```
    npx expo start
    ```
 
-3. Connect to platforms and start verifying your skills!
+3. Connect your XION wallet to begin verifying your skills.
 
-## Hackathon Theme Alignment
+## Technologies Used
 
-This project aligns with the hackathon theme of building an iOS or Android mobile-first app using XION's Mobile Development Kit (Dave), leveraging verifiable internet data (zkTLS) and connecting to an on-chain source of truth.
+- React Native / Expo
+- XION Blockchain
+- zkTLS for credential verification
+- TypeScript
+- Abstraxion Wallet Integration
 
-Skillexify demonstrates:
-- Mobile-first design with React Native/Expo
-- zkTLS integration for verifiable internet data
-- XION blockchain as the on-chain source of truth for skill credentials
-- Practical application of verifiable credentials in the professional development space
+## Hackathon Theme
+
+This project was built for the XION Mobile Development Kit (Dave) hackathon, focusing on leveraging verifiable internet data (zkTLS) and connecting to an on-chain source of truth.

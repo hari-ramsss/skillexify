@@ -37,6 +37,8 @@ function TabBarIcon(props: {
   name: string;
   color: string;
 }) {
+  // For now, we'll return an empty view since we don't have the actual icon component
+  // In a real app, you would use an actual icon component here
   return (
     <></>
   );
