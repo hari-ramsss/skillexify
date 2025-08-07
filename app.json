@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "skillexify-app",
-    "slug": "skillexify-app",
+    "name": "Skillexify",
+    "slug": "skillexify",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "skillexifyapp",
+    "scheme": "skillexify",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
