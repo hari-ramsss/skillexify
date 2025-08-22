@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { View, StyleSheet, Text, TouchableOpacity, ScrollView, FlatList, Alert } from "react-native";
 import { useAbstraxionAccount } from "@burnt-labs/abstraxion-react-native";
+import { blockchainService, LeaderboardEntry, UserReputation } from "../../services/blockchain";
 
-type LeaderboardEntry = {
+type LocalLeaderboardEntry = {
   rank: number;
   username: string;
   platform: string;
@@ -31,17 +32,10 @@ type Endorsement = {
 export default function CommunityScreen() {
   const { data: account, isConnected } = useAbstraxionAccount();
 
-  // Mock leaderboard data
-  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([
-    { rank: 1, username: "crypto_master", platform: "LeetCode", score: 2850, address: "xion1..." },
-    { rank: 2, username: "data_wizard", platform: "Kaggle", score: 2720, address: "xion2..." },
-    { rank: 3, username: "code_ninja", platform: "GitHub", score: 2680, address: "xion3..." },
-    { rank: 4, username: "algo_expert", platform: "HackerRank", score: 2590, address: "xion4..." },
-    { rank: 5, username: "ml_guru", platform: "Kaggle", score: 2510, address: "xion5..." },
-    { rank: 6, username: "dev_star", platform: "GitHub", score: 2430, address: "xion6..." },
-    { rank: 7, username: "puzzle_solver", platform: "LeetCode", score: 2380, address: "xion7..." },
-    { rank: 8, username: "stack_overflow", platform: "Stack Overflow", score: 2290, address: "xion8..." },
-  ]);
+  // Leaderboard data from blockchain
+  const [leaderboardData, setLeaderboardData] = useState<LocalLeaderboardEntry[]>([]);
+  const [userReputation, setUserReputation] = useState<UserReputation | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // Mock community data
   const [communities, setCommunities] = useState<Community[]>([
@@ -59,7 +53,62 @@ export default function CommunityScreen() {
   ]);
 
   const [newEndorsement, setNewEndorsement] = useState({ skill: "", message: "" });
-  const [loading, setLoading] = useState(false);
+
+  // Load data from blockchain when component mounts
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        await blockchainService.initialize();
+        await loadLeaderboardData();
+        if (account?.bech32Address) {
+          await loadUserReputation();
+        }
+      } catch (error) {
+        console.error("Error initializing community data:", error);
+      }
+    };
+
+    initializeData();
+  }, [account?.bech32Address]);
+
+  const loadLeaderboardData = async () => {
+    try {
+      setLoading(true);
+      const leaderboard = await blockchainService.getLeaderboard(undefined, 50);
+      
+      // Convert blockchain leaderboard to local format
+      const convertedData: LocalLeaderboardEntry[] = leaderboard.map(entry => ({
+        rank: entry.rank,
+        username: entry.user.substring(0, 12) + "...", // Truncate address for display
+        platform: entry.primaryPlatform,
+        score: entry.score,
+        address: entry.user
+      }));
+      
+      setLeaderboardData(convertedData);
+    } catch (error) {
+      console.error("Error loading leaderboard:", error);
+      // Fallback to mock data if blockchain call fails
+      setLeaderboardData([
+        { rank: 1, username: "crypto_master", platform: "LeetCode", score: 2850, address: "xion1..." },
+        { rank: 2, username: "data_wizard", platform: "Kaggle", score: 2720, address: "xion2..." },
+        { rank: 3, username: "code_ninja", platform: "GitHub", score: 2680, address: "xion3..." },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadUserReputation = async () => {
+    if (!account?.bech32Address) return;
+    
+    try {
+      const reputation = await blockchainService.getUserReputation(account.bech32Address);
+      setUserReputation(reputation);
+    } catch (error) {
+      console.error("Error loading user reputation:", error);
+    }
+  };
 
   const joinCommunity = (id: string) => {
     setCommunities(prev =>
@@ -71,16 +120,33 @@ export default function CommunityScreen() {
     );
   };
 
-  const submitEndorsement = () => {
+  const submitEndorsement = async () => {
     if (!newEndorsement.skill || !newEndorsement.message) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
+    if (!account?.bech32Address) {
+      Alert.alert("Error", "Please connect your wallet first");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // For demo purposes, we'll endorse ourselves (in real app, you'd endorse others)
+      const txHash = await blockchainService.addEndorsement(
+        account.bech32Address,
+        newEndorsement.skill,
+        newEndorsement.message,
+        10 // endorsement weight
+      );
+
+      // Create local endorsement for immediate UI update
     const endorsement: Endorsement = {
-      id: Math.random().toString(36).substring(7),
-      from: "anonymous_user",
-      to: account?.bech32Address || "current_user",
+        id: `${account.bech32Address}_${Date.now()}`,
+        from: "self_endorsement",
+        to: account.bech32Address,
       skill: newEndorsement.skill,
       message: newEndorsement.message,
       timestamp: new Date().toISOString().split('T')[0]
@@ -88,10 +154,20 @@ export default function CommunityScreen() {
 
     setEndorsements(prev => [endorsement, ...prev]);
     setNewEndorsement({ skill: "", message: "" });
-    Alert.alert("Success", "Endorsement submitted!");
+      Alert.alert("Success", `Endorsement stored on-chain!\nTx: ${txHash.substring(0, 16)}...`);
+      
+      // Reload user reputation
+      await loadUserReputation();
+      
+    } catch (error) {
+      console.error("Error submitting endorsement:", error);
+      Alert.alert("Error", `Failed to submit endorsement: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const renderLeaderboardItem = ({ item }: { item: LeaderboardEntry }) => (
+  const renderLeaderboardItem = ({ item }: { item: LocalLeaderboardEntry }) => (
     <View style={[styles.leaderboardItem, item.address === account?.bech32Address && styles.currentUserItem]}>
       <View style={styles.rankContainer}>
         <Text style={styles.rankText}>{item.rank}</Text>
@@ -156,9 +232,23 @@ export default function CommunityScreen() {
           <View style={styles.userRankContainer}>
             <Text style={styles.sectionTitle}>Your Global Rank</Text>
             <View style={styles.userRankCard}>
-              <Text style={styles.userRank}>#247</Text>
-              <Text style={styles.userScore}>2150 points</Text>
-              <Text style={styles.userPlatform}>Overall Score</Text>
+              {userReputation ? (
+                <>
+                  <Text style={styles.userRank}>
+                    #{leaderboardData.find(entry => entry.address === account?.bech32Address)?.rank || "N/A"}
+                  </Text>
+                  <Text style={styles.userScore}>{userReputation.score} points</Text>
+                  <Text style={styles.userPlatform}>
+                    {userReputation.totalProofs} proofs • {userReputation.endorsementsReceived} endorsements
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.userRank}>#0</Text>
+                  <Text style={styles.userScore}>0 points</Text>
+                  <Text style={styles.userPlatform}>No proofs yet</Text>
+                </>
+              )}
             </View>
           </View>
 
@@ -237,7 +327,7 @@ export default function CommunityScreen() {
                 <TextInput
                   style={styles.textArea}
                   value={newEndorsement.message}
-                  onChangeText={(text) => setNewEndorsement({ ...newEndorsement, message: text })}
+                  onChangeText={(text: string) => setNewEndorsement({ ...newEndorsement, message: text })}
                   placeholder="Write your endorsement message..."
                   placeholderTextColor="#999"
                   multiline

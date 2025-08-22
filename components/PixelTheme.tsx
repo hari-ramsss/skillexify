@@ -57,7 +57,7 @@ export const NeonText: React.FC<{
   size?: 'small' | 'medium' | 'large';
 }> = ({ text, color = Colors.dark.primary, style, size = 'medium' }) => {
   const fontSize = size === 'small' ? 14 : size === 'medium' ? 20 : 28;
-  
+
   return (
     <Text
       style={[

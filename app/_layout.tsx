@@ -1,3 +1,4 @@
+import "../polyfills";
 import "react-native-reanimated";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
@@ -9,6 +10,7 @@ import {
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import * as Linking from "expo-linking";
 
 import { AbstraxionProvider } from "@burnt-labs/abstraxion-react-native";
 
@@ -16,11 +18,23 @@ import { AbstraxionProvider } from "@burnt-labs/abstraxion-react-native";
 SplashScreen.preventAutoHideAsync();
 
 const treasuryConfig = {
-  treasury: process.env.EXPO_PUBLIC_TREASURY_CONTRACT_ADDRESS || "xion1daqyfnak98wry0grw5vnk9r2rfwpksv4hl53yj537vstmghayc9suzkdq8",
+  treasury:
+    process.env.EXPO_PUBLIC_TREASURY_CONTRACT_ADDRESS ||
+    "xion1daqyfnak98wry0grw5vnk9r2rfwpksv4hl53yj537vstmghayc9suzkdq8",
   gasPrice: "0.001uxion",
-  rpcUrl: process.env.EXPO_PUBLIC_RPC_ENDPOINT || "https://rpc.xion-testnet-2.burnt.com:443",
-  restUrl: process.env.EXPO_PUBLIC_REST_ENDPOINT || "https://api.xion-testnet-2.burnt.com",
-  callbackUrl: "skillexify://",
+  rpcUrl:
+    process.env.EXPO_PUBLIC_RPC_ENDPOINT ||
+    "https://rpc.xion-testnet-2.burnt.com:443",
+  restUrl:
+    process.env.EXPO_PUBLIC_REST_ENDPOINT ||
+    "https://api.xion-testnet-2.burnt.com",
+  // Use a platform-appropriate callback URL so web redirects back correctly.
+  // Linking.createURL('/') resolves to e.g. 'skillexify:///' on native and
+  // 'http://localhost:xxxx/' on web.
+  // Ensure Abstraxion is configured with the same scheme configured in app.json
+  // On web this will resolve to http://localhost, which Abstraxion will warn about.
+  // That warning is safe in development; you can tick the confirmation and continue.
+  callbackUrl: Linking.createURL("/"),
 };
 
 export default function RootLayout() {

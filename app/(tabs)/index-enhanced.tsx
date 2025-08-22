@@ -12,8 +12,11 @@ import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-ico
 
 const { width: screenWidth } = Dimensions.get('window');
 
+// Do not hard-crash if the env var is missing in development/web; just warn.
 if (!process.env.EXPO_PUBLIC_USER_MAP_CONTRACT_ADDRESS) {
-  throw new Error("EXPO_PUBLIC_USER_MAP_CONTRACT_ADDRESS is not set in your environment file");
+  console.warn(
+    "EXPO_PUBLIC_USER_MAP_CONTRACT_ADDRESS is not set. Continuing in development mode."
+  );
 }
 
 type SkillData = {
