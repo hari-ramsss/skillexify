@@ -141,11 +141,11 @@ export default function HomeScreen() {
     const initializeBlockchain = async () => {
       try {
         await blockchainService.initialize();
-        
+
         // Initialize with signing client if available
         if (client && account?.bech32Address) {
           await blockchainService.initializeWithSigner(client, account.bech32Address);
-          
+
           // Load user's existing data from blockchain
           await loadUserData();
         }
@@ -164,7 +164,7 @@ export default function HomeScreen() {
 
     try {
       setLoading(true);
-      
+
       // Load proofs from blockchain
       const userProofs = await blockchainService.getUserProofs(account.bech32Address);
       const convertedProofs = userProofs.map(proof => ({
@@ -201,7 +201,7 @@ export default function HomeScreen() {
         const platformProofs = userProofs.filter(p => p.platform === platform);
         const latestProof = platformProofs[platformProofs.length - 1];
         const parsedData = JSON.parse(latestProof.skillData);
-        
+
         return {
           platform,
           username: latestProof.username,
@@ -299,7 +299,7 @@ export default function HomeScreen() {
     }
   };
 
-          const processVerifiedData = async (platform: string, user: string, platformData: any, zkProof?: ZKProof | RealZKProof) => {
+  const processVerifiedData = async (platform: string, user: string, platformData: any, zkProof?: ZKProof | RealZKProof) => {
     // Convert platform data to our internal format
     const newSkillData: SkillData = {
       platform,
@@ -311,12 +311,12 @@ export default function HomeScreen() {
     };
 
     setSkillData(prev => [...prev, newSkillData]);
-    
+
     const verificationMethod = zkProof ? "zkTLS" : "Standard API";
     const proofInfo = zkProof ? `\nProof ID: ${zkProof.proofId.substring(0, 16)}...` : "";
-    
+
     Alert.alert(
-      "Verification Success!", 
+      "Verification Success!",
       `✅ ${verificationMethod} verification completed for ${platform}!\n` +
       `Account: ${user}\n` +
       `Score: ${platformData.stats.score || 0}\n` +
@@ -327,10 +327,10 @@ export default function HomeScreen() {
 
   const handleVerificationError = (platform: string, user: string, error: any) => {
     console.error("Error fetching platform data:", error);
-    
+
     // Fallback to mock data if platform API fails
     Alert.alert(
-      "Platform API Unavailable", 
+      "Platform API Unavailable",
       `Using demo data for ${platform}. In production, this would fetch real data.`,
       [
         {
@@ -354,7 +354,7 @@ export default function HomeScreen() {
   };
 
   // Function to generate proof of skill
-          const generateProof = async (platform: string, zkProof?: ZKProof | RealZKProof) => {
+  const generateProof = async (platform: string, zkProof?: ZKProof | RealZKProof) => {
     if (!client || !account?.bech32Address) {
       Alert.alert("Error", "Please connect your wallet first");
       return;
@@ -416,7 +416,7 @@ export default function HomeScreen() {
 
       // Store proof on blockchain
       const txHash = await blockchainService.storeProof(proofData);
-      
+
       // Create local proof object for immediate UI update
       const newProof: ProofOfSkill = {
         id: `${account.bech32Address}:${platform}:${Date.now()}`,
@@ -428,10 +428,10 @@ export default function HomeScreen() {
 
       setProofs(prev => [newProof, ...prev]);
       Alert.alert("Success", `Proof of Skill stored on-chain for ${platform}!\nTx: ${txHash.substring(0, 16)}...`);
-      
+
       // Generate NFT after successful proof storage
       await generateNFT(platform, skillDataForProof);
-      
+
     } catch (error) {
       console.error("Error generating proof:", error);
       Alert.alert("Error", `Failed to generate proof of skill: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -451,7 +451,7 @@ export default function HomeScreen() {
       // Calculate skill level based on user's performance
       const userProofs = await blockchainService.getUserProofs(account.bech32Address, platform);
       const proofCount = userProofs.length + 1; // +1 for the proof we just added
-      
+
       // Calculate platform score from skill data
       let platformScore = 0;
       if (skillDataForProof.contributions) platformScore += skillDataForProof.contributions * 2;
@@ -540,7 +540,7 @@ export default function HomeScreen() {
 
   const renderPlatformIcon = (platform: string, size: number = 24, color: string = Colors.dark.primary) => {
     const iconConfig = platformIcons[platform] || { name: 'code', type: 'Ionicons' };
-    
+
     switch (iconConfig.type) {
       case 'Ionicons':
         return <Ionicons name={iconConfig.name as any} size={size} color={color} />;
@@ -577,7 +577,7 @@ export default function HomeScreen() {
             <Text style={styles.title}>SKILLEXIFY</Text>
           </LinearGradient>
           <Text style={styles.subtitle}>VERIFIABLE TECHNICAL SKILL CREDENTIALS</Text>
-          
+
           <View style={styles.featureBadges}>
             <Animated.View style={[styles.featureBadge, { transform: [{ scale: pulseAnim }] }]}>
               <MaterialCommunityIcons name="shield-check" size={20} color={Colors.web3.blockchain} />
@@ -702,8 +702,8 @@ export default function HomeScreen() {
                 </View>
 
                 {skillData.map((skill, index) => (
-                  <Animated.View 
-                    key={index} 
+                  <Animated.View
+                    key={index}
                     style={[
                       styles.skillCard,
                       { transform: [{ translateY: floatAnim }] }
@@ -714,7 +714,7 @@ export default function HomeScreen() {
                       <Text style={styles.skillPlatform}>{skill.platform}</Text>
                     </View>
                     <Text style={styles.skillUsername}>@{skill.username}</Text>
-                    
+
                     <View style={styles.skillStats}>
                       {skill.rank && (
                         <View style={styles.statItem}>
@@ -761,7 +761,7 @@ export default function HomeScreen() {
 
                 <View style={styles.nftGrid}>
                   {nfts.map((nft, index) => (
-                    <Animated.View 
+                    <Animated.View
                       key={index}
                       style={[
                         styles.nftCard,

@@ -26,13 +26,22 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "scheme": "skillexify",
+      "preferRelatedApplications": true
     },
     "plugins": [
       "expo-router"
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9ba319ca-73f5-499d-b3ce-eb960aad460b"
+      }
+    },
+    "owner": "hariramsathya_05"
   }
 }

@@ -13,9 +13,34 @@ import { StatusBar } from "expo-status-bar";
 import * as Linking from "expo-linking";
 
 import { AbstraxionProvider } from "@burnt-labs/abstraxion-react-native";
+import { redirectHandler } from "../utils/redirectHandler";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+// Create a development-friendly callback URL
+const createCallbackUrl = () => {
+  // For web development, always use the window location
+  if (typeof window !== 'undefined') {
+    const currentUrl = `${window.location.protocol}//${window.location.host}`;
+    console.log('Web callback URL:', currentUrl);
+    return currentUrl;
+  }
+
+  // For native apps, use the proper deep link scheme
+  const baseUrl = Linking.createURL("/");
+  console.log('Native callback URL:', baseUrl);
+
+  // Handle the exp:// URLs properly for native
+  if (baseUrl.includes('exp://')) {
+    return 'skillexify://auth';
+  }
+
+  return baseUrl;
+};
+
+const callbackUrl = createCallbackUrl();
+console.log('Abstraxion callback URL configured:', callbackUrl);
 
 const treasuryConfig = {
   treasury:
@@ -28,13 +53,15 @@ const treasuryConfig = {
   restUrl:
     process.env.EXPO_PUBLIC_REST_ENDPOINT ||
     "https://api.xion-testnet-2.burnt.com",
-  // Use a platform-appropriate callback URL so web redirects back correctly.
-  // Linking.createURL('/') resolves to e.g. 'skillexify:///' on native and
-  // 'http://localhost:xxxx/' on web.
-  // Ensure Abstraxion is configured with the same scheme configured in app.json
-  // On web this will resolve to http://localhost, which Abstraxion will warn about.
-  // That warning is safe in development; you can tick the confirmation and continue.
-  callbackUrl: Linking.createURL("/"),
+  // Use properly configured callback URL
+  callbackUrl: callbackUrl,
+  // Additional configuration for better Web3 support
+  stake: false,
+  bank: ["uxion"],
+  // Add user map contract for proper authentication
+  userMapContract: process.env.EXPO_PUBLIC_USER_MAP_CONTRACT_ADDRESS,
+  // Enable authentication features
+  enableAuthentication: true,
 };
 
 export default function RootLayout() {
@@ -47,6 +74,16 @@ export default function RootLayout() {
     if (loaded) {
       SplashScreen.hideAsync();
     }
+
+    // Initialize redirect handler for Abstraxion callbacks
+    redirectHandler.addListener((url) => {
+      console.log('Redirect handler received URL:', url);
+      // The redirect handler will manage the callback automatically
+    });
+
+    return () => {
+      // Cleanup if needed
+    };
   }, [loaded]);
 
   if (!loaded) {

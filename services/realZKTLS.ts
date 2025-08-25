@@ -70,7 +70,7 @@ class RealZKTLSService {
     try {
       // Check if crypto libraries are available
       this.cryptoAvailable = typeof CryptoJS !== 'undefined' && typeof CryptoJS.SHA256 === 'function';
-      
+
       // Load existing sessions from storage
       await this.loadSessionsFromStorage();
       console.log(`✅ Real zkTLS service initialized with cryptographic operations (crypto available: ${this.cryptoAvailable})`);
@@ -90,13 +90,13 @@ class RealZKTLSService {
       // Fallback to simple hash if crypto is not available
       let hash = 0;
       if (data.length === 0) return hash.toString();
-      
+
       for (let i = 0; i < data.length; i++) {
         const char = data.charCodeAt(i);
         hash = ((hash << 5) - hash) + char;
         hash = hash & hash; // Convert to 32-bit integer
       }
-      
+
       return Math.abs(hash).toString(16).padStart(8, '0');
     }
   }
@@ -145,14 +145,14 @@ class RealZKTLSService {
       const dataHash = await this.cryptographicHash(dataString);
       const platformHash = await this.cryptographicHash(platform);
       const userHash = await this.cryptographicHash(username);
-      
+
       // Generate secure random values
       const nonce = this.generateSecureRandom(32);
       const secret = this.generateSecureRandom(64);
-      
+
       // Create commitment
       const commitmentHash = await this.createCommitment(dataString, nonce);
-      
+
       // Generate timestamp
       const timestamp = Math.floor(Date.now() / 1000);
 
@@ -233,7 +233,7 @@ class RealZKTLSService {
       // Verify timestamp is recent (within last 24 hours)
       const now = Math.floor(Date.now() / 1000);
       const proofTime = proof.publicSignals.timestamp;
-      
+
       if (now - proofTime > 24 * 60 * 60) {
         console.warn('⚠️ Proof timestamp too old');
         return false;
@@ -249,7 +249,7 @@ class RealZKTLSService {
       if (this.cryptoAvailable) {
         const signatureData = `${proof.publicSignals.dataHash}:${proof.publicSignals.platformHash}:${proof.publicSignals.userHash}:${proof.publicSignals.timestamp}:${proof.verificationData.nonce}`;
         const expectedSignature = CryptoJS.HmacSHA256(signatureData, this.CRYPTO_KEY).toString();
-        
+
         if (proof.verificationData.signature !== expectedSignature) {
           console.warn('⚠️ Cryptographic signature verification failed');
           return false;
@@ -265,7 +265,7 @@ class RealZKTLSService {
 
       console.log(`✅ Verified real ZK proof with ${this.cryptoAvailable ? 'cryptographic' : 'fallback'} integrity: ${proof.proofId}`);
       return true;
-      
+
     } catch (error) {
       console.error('❌ Proof verification error:', error);
       return false;
@@ -277,7 +277,7 @@ class RealZKTLSService {
    */
   async initializeRealVerification(platform: string, username: string): Promise<string> {
     const sessionId = `real_zktls_${Date.now()}_${this.generateSecureRandom(16)}`;
-    
+
     const session: VerificationSession = {
       sessionId,
       platform,
@@ -288,9 +288,9 @@ class RealZKTLSService {
 
     this.sessions.set(sessionId, session);
     await this.saveSessionsToStorage();
-    
+
     console.log(`🔐 Starting real zkTLS verification for ${platform}:${username}`);
-    
+
     // Simulate the verification process
     setTimeout(() => {
       this.processRealVerification(sessionId);
@@ -308,20 +308,20 @@ class RealZKTLSService {
 
     try {
       session.status = 'verifying';
-      
+
       // Simulate TLS connection and data extraction
       const platformData = await this.simulateTLSConnection(session.platform, session.username);
-      
+
       if (!platformData.verified) {
         throw new Error('Platform data verification failed');
       }
 
       // Generate real zero-knowledge proof
       const proof = await this.generateRealZKProof(platformData, session.platform, session.username);
-      
+
       // Verify the proof
       const isProofValid = await this.verifyRealProof(proof);
-      
+
       if (!isProofValid) {
         throw new Error('Zero-knowledge proof verification failed');
       }
@@ -329,9 +329,9 @@ class RealZKTLSService {
       // Store the proof in the session
       session.proof = proof;
       session.status = 'completed';
-      
+
       await this.saveSessionsToStorage();
-      
+
     } catch (error) {
       session.status = 'failed';
       session.error = error instanceof Error ? error.message : String(error);
@@ -348,7 +348,7 @@ class RealZKTLSService {
 
       // Simulate TLS connection and data extraction
       const platformData = await this.simulateTLSConnection(platform, username);
-      
+
       if (!platformData.verified) {
         return {
           success: false,
@@ -358,10 +358,10 @@ class RealZKTLSService {
 
       // Generate real zero-knowledge proof
       const proof = await this.generateRealZKProof(platformData, platform, username);
-      
+
       // Verify the proof
       const isProofValid = await this.verifyRealProof(proof);
-      
+
       if (!isProofValid) {
         return {
           success: false,
@@ -437,7 +437,7 @@ class RealZKTLSService {
     return new Promise((resolve, reject) => {
       const checkStatus = () => {
         const session = this.sessions.get(sessionId);
-        
+
         if (!session) {
           reject(new Error('Session not found'));
           return;
@@ -481,6 +481,12 @@ class RealZKTLSService {
    */
   private async loadSessionsFromStorage() {
     try {
+      // Check if we're in a web environment without proper AsyncStorage
+      if (typeof window !== 'undefined' && !AsyncStorage.getItem) {
+        console.log('Web environment detected, skipping session storage');
+        return;
+      }
+
       const sessionsData = await AsyncStorage.getItem(this.STORAGE_KEY);
       if (sessionsData) {
         const sessionsArray = JSON.parse(sessionsData);
@@ -488,6 +494,8 @@ class RealZKTLSService {
       }
     } catch (error) {
       console.error('Failed to load sessions:', error);
+      // Initialize with empty sessions on error
+      this.sessions = new Map();
     }
   }
 
@@ -528,7 +536,7 @@ class RealZKTLSService {
         this.sessions.delete(sessionId);
       }
     }
-    
+
     this.saveSessionsToStorage();
   }
 }

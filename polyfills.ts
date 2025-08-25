@@ -92,6 +92,7 @@ try {
 	// @ts-ignore
 	if (typeof global.stream === 'undefined') {
 		// eslint-disable-next-line @typescript-eslint/no-var-requires
+		// @ts-ignore
 		global.stream = require('readable-stream');
 	}
 } catch (error: any) {
@@ -118,12 +119,12 @@ try {
 	// @ts-ignore
 	if (typeof global.util === 'undefined') {
 		// @ts-ignore
-		global.util = { inherits: () => {} };
+		global.util = { inherits: () => { } };
 	}
 	// @ts-ignore
 	if (typeof global.assert === 'undefined') {
 		// @ts-ignore
-		global.assert = () => {};
+		global.assert = () => { };
 	}
 	// @ts-ignore
 	if (typeof global.constants === 'undefined') {
@@ -133,7 +134,7 @@ try {
 	// @ts-ignore
 	if (typeof global.events === 'undefined') {
 		// @ts-ignore
-		global.events = { EventEmitter: class {} };
+		global.events = { EventEmitter: class { } };
 	}
 } catch (error: any) {
 	console.warn('Node.js module polyfills not available:', error?.message || error);

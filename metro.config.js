@@ -16,12 +16,24 @@ config.resolver.blockList = exclusionList([
   /contracts\/.*\/artifacts\/.*/,
 ]);
 
-// Add minimal resolver to handle unknown module errors
-config.resolver.alias = {
-  'crypto': 'react-native-quick-crypto',
-};
-
 // Optional: shrink the file watcher scope explicitly
 config.watchFolders = [projectRoot];
+
+// Add resolver configurations for Web3 and crypto modules
+config.resolver.alias = {
+  ...config.resolver.alias,
+  'crypto': require.resolve('expo-crypto'),
+  'stream': require.resolve('readable-stream'),
+  'buffer': require.resolve('buffer'),
+};
+
+// Add Node.js polyfills for better compatibility
+config.resolver.platforms = ['native', 'web', 'ios', 'android'];
+
+// Enhanced transformer for better module resolution
+config.transformer = {
+  ...config.transformer,
+  unstable_allowRequireContext: true,
+};
 
 module.exports = config;
